@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Package Cost Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      margin: 0;
+      max-width: 500px;
+      margin: auto;
+      background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+    h2 {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.5rem;
+      border-radius: 8px;
+    }
+    label {
+      margin-top: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.2rem;
+      border-radius: 4px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 4px;
+    }
+    .result {
+      margin-top: 1rem;
+      font-weight: bold;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Package Cost Calculator</h2>
+
+  <label for="amount1">Hotel (13% tax):</label>
+  <input type="number" id="amount1" step="0.01">
+
+  <label for="amount2">Flight (8% tax):</label>
+  <input type="number" id="amount2" step="0.01">
+
+  <label for="additional">Transfer (no tax):</label>
+  <input type="number" id="additional" step="0.01">
+
+  <label for="currency">Select Currency:</label>
+  <select id="currency" onchange="toggleJMDInput()">
+    <option value="USD" selected>USD ($)</option>
+    <option value="GBP">GBP (£)</option>
+    <option value="CAD">CAD (C$)</option>
+    <option value="JMD">JMD (J$)</option>
+  </select>
+
+  <div id="jmdRateField" style="display:none;">
+    <label for="jmdRate">Enter USD to JMD Exchange Rate:</label>
+    <input type="number" id="jmdRate" step="0.01">
+  </div>
+
+  <button onclick="calculateTotal()">Calculate Total</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    const currencySymbols = {
+      USD: '$',
+      GBP: '£',
+      CAD: 'C$',
+      JMD: 'J$'
+    };
+
+    const exchangeRates = {
+      GBP: 0.74,
+      CAD: 1.37
+    };
+
+    function toggleJMDInput() {
+      const currency = document.getElementById('currency').value;
+      document.getElementById('jmdRateField').style.display = (currency === 'JMD') ? 'block' : 'none';
+    }
+
+    function calculateTotal() {
+      const amt1 = parseFloat(document.getElementById('amount1').value) || 0;
+      const amt2 = parseFloat(document.getElementById('amount2').value) || 0;
+      const additional = parseFloat(document.getElementById('additional').value) || 0;
+      const currency = document.getElementById('currency').value;
+      const jmdRate = parseFloat(document.getElementById('jmdRate').value) || 0;
+
+      const taxed1 = amt1 * 1.13;
+      const taxed2 = amt2 * 1.08;
+      const totalUSD = taxed1 + taxed2 + additional;
+
+      let convertedTotal = totalUSD;
+      let rateNote = 'Exchange rate: 1 USD = 1.00 USD';
+
+      if (currency === 'JMD' && jmdRate > 0) {
+        convertedTotal = totalUSD * jmdRate;
+        rateNote = `Exchange rate: 1 USD = ${jmdRate.toFixed(2)} JMD`;
+      } else if (currency !== 'USD') {
+        const rate = exchangeRates[currency];
+        convertedTotal = totalUSD * rate;
+        rateNote = `Exchange rate: 1 USD = ${rate.toFixed(2)} ${currency}`;
+      }
+
+      const symbol = currencySymbols[currency] || '$';
+      document.getElementById('result').innerHTML =
+        `${rateNote}<br>USD Total: $${Math.round(totalUSD)}<br>Total in ${currency}: ${symbol}${convertedTotal.toFixed(2)}`;
+    }
+  </script>
+</body>
+</html>
